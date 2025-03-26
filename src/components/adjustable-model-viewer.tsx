@@ -66,7 +66,7 @@ function Loader() {
 
 function CameraControls() {
   const { camera } = useThree()
-  const controlsRef = useRef<any>()
+  const controlsRef = useRef<any>(null)
 
   const handleReset = () => {
     if (controlsRef.current) {
