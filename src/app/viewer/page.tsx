@@ -1,7 +1,7 @@
 "use client"
 
 import { useSearchParams } from "next/navigation"
-import ModelViewer from "@/components/model-viewer"
+import AdjustableModelViewer from "@/components/adjustable-model-viewer"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
@@ -23,7 +23,7 @@ export default function ViewerPage() {
       </div>
 
       <div className="w-full flex-1">
-        <ModelViewer modelUrl={modelUrl} />
+        <AdjustableModelViewer modelUrl={modelUrl} />
       </div>
     </main>
   )
