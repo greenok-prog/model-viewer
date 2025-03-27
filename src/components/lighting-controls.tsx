@@ -1,36 +1,27 @@
 "use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Select } from "@/components/ui/select"
-import { RefreshCw } from "lucide-react"
+import { Sun, Moon, Cloud } from "lucide-react"
 
 interface LightingControlsProps {
-  ambientIntensity: number
-  setAmbientIntensity: (value: number) => void
-  directionalIntensity: number
-  setDirectionalIntensity: (value: number) => void
   environmentPreset: string
   setEnvironmentPreset: (value: string) => void
   showShadows: boolean
   setShowShadows: (value: boolean) => void
-  onReset: () => void
   onPresetSelect: (preset: string) => void
+  activePreset: string
 }
 
 export default function LightingControls({
-  ambientIntensity,
-  setAmbientIntensity,
-  directionalIntensity,
-  setDirectionalIntensity,
   environmentPreset,
   setEnvironmentPreset,
   showShadows,
   setShowShadows,
-  onReset,
   onPresetSelect,
+  activePreset,
 }: LightingControlsProps) {
   const environmentOptions = [
     { value: "studio", label: "Студия" },
@@ -46,10 +37,9 @@ export default function LightingControls({
   ]
 
   const lightingPresets = [
-    { value: "soft", label: "Мягкое освещение" },
-    { value: "bright", label: "Яркое освещение" },
-    { value: "dark", label: "Тёмное освещение" },
-    { value: "neutral", label: "Нейтральное" },
+    { value: "soft", label: "Мягкое", icon: Cloud },
+    { value: "bright", label: "Яркое", icon: Sun },
+    { value: "dark", label: "Тёмное", icon: Moon },
   ]
 
   return (
@@ -60,50 +50,24 @@ export default function LightingControls({
       <CardContent className="space-y-4">
         {/* Lighting presets */}
         <div className="space-y-2">
-          <Label className="text-xs">Пресеты освещения</Label>
-          <div className="grid grid-cols-2 gap-2">
-            {lightingPresets.map((preset) => (
-              <Button
-                key={preset.value}
-                variant="outline"
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => onPresetSelect(preset.value)}
-              >
-                {preset.label}
-              </Button>
-            ))}
+          <Label className="text-xs">Тип освещения</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {lightingPresets.map((preset) => {
+              const Icon = preset.icon
+              return (
+                <Button
+                  key={preset.value}
+                  variant={activePreset === preset.value ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-10 flex flex-col gap-1 items-center justify-center"
+                  onClick={() => onPresetSelect(preset.value)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{preset.label}</span>
+                </Button>
+              )
+            })}
           </div>
-        </div>
-
-        {/* Ambient light intensity */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs">Фоновое освещение</Label>
-            <span className="text-xs text-muted-foreground">{(ambientIntensity * 100).toFixed(0)}%</span>
-          </div>
-          <Slider
-            value={[ambientIntensity]}
-            min={0}
-            max={1}
-            step={0.01}
-            onValueChange={(value) => setAmbientIntensity(value[0])}
-          />
-        </div>
-
-        {/* Directional light intensity */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs">Направленное освещение</Label>
-            <span className="text-xs text-muted-foreground">{(directionalIntensity * 100).toFixed(0)}%</span>
-          </div>
-          <Slider
-            value={[directionalIntensity]}
-            min={0}
-            max={1}
-            step={0.01}
-            onValueChange={(value) => setDirectionalIntensity(value[0])}
-          />
         </div>
 
         {/* Environment preset */}
@@ -122,12 +86,6 @@ export default function LightingControls({
           <Label className="text-xs">Показывать тени</Label>
           <Switch checked={showShadows} onCheckedChange={setShowShadows} />
         </div>
-
-        {/* Reset button */}
-        <Button variant="outline" size="sm" className="w-full text-xs h-8" onClick={onReset}>
-          <RefreshCw className="h-3.5 w-3.5 mr-1" />
-          Сбросить освещение
-        </Button>
       </CardContent>
     </Card>
   )

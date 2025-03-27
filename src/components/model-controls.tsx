@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
@@ -15,6 +15,7 @@ interface ModelControlsProps {
   setPosition: (position: [number, number, number]) => void
   onReset: () => void
   onFitToView: () => void
+  isMobile?: boolean
 }
 
 export default function ModelControls({
@@ -24,13 +25,38 @@ export default function ModelControls({
   setPosition,
   onReset,
   onFitToView,
+  isMobile = false,
 }: ModelControlsProps) {
+  // Use local state to prevent jumps in the UI
+  const [localScale, setLocalScale] = useState(scale)
   const [posX, setPosX] = useState(position[0].toString())
   const [posY, setPosY] = useState(position[1].toString())
   const [posZ, setPosZ] = useState(position[2].toString())
 
+  // Update local scale when prop changes
+  useEffect(() => {
+    if (Math.abs(localScale - scale) > 0.01) {
+      setLocalScale(scale)
+    }
+  }, [scale])
+
+  // Update position fields when props change
+  useEffect(() => {
+    setPosX(position[0].toString())
+    setPosY(position[1].toString())
+    setPosZ(position[2].toString())
+  }, [position])
+
   const handleScaleChange = (value: number[]) => {
-    setScale(value[0])
+    const newScale = Math.max(0.01, value[0])
+    setLocalScale(newScale)
+    setScale(newScale)
+  }
+
+  const handleScaleButton = (delta: number) => {
+    const newScale = Math.max(0.01, localScale + delta)
+    setLocalScale(newScale)
+    setScale(newScale)
   }
 
   const handlePositionChange = (axis: "x" | "y" | "z", value: string) => {
@@ -64,6 +90,46 @@ export default function ModelControls({
     }
   }
 
+  // Компактная версия для мобильных устройств
+  if (isMobile) {
+    return (
+      <Card className="w-full max-w-[250px]">
+        <CardHeader className="pb-2 pt-3 px-3">
+          <CardTitle className="text-xs font-medium">Настройки модели</CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 space-y-3">
+          {/* Scale controls - компактная версия */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Масштаб</Label>
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleScaleButton(-0.1)}>
+                  <ZoomOut className="h-3 w-3" />
+                </Button>
+                <span className="text-xs w-10 text-center">{localScale.toFixed(2)}x</span>
+                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleScaleButton(0.1)}>
+                  <ZoomIn className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-2 pt-1">
+            <Button variant="outline" size="sm" className="flex-1 text-xs h-7" onClick={onReset}>
+              <RefreshCw className="h-3 w-3 mr-1" />
+              Сбросить
+            </Button>
+            <Button variant="default" size="sm" className="flex-1 text-xs h-7" onClick={onFitToView}>
+              Подогнать
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Полная версия для десктопа
   return (
     <Card className="w-full max-w-xs">
       <CardHeader className="pb-3">
@@ -74,31 +140,21 @@ export default function ModelControls({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs">Масштаб модели</Label>
-            <span className="text-xs text-muted-foreground">{scale.toFixed(2)}x</span>
+            <span className="text-xs text-muted-foreground">{localScale.toFixed(2)}x</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setScale(Math.max(0.1, scale - 0.1))}
-            >
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleScaleButton(-0.1)}>
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
             <Slider
-              value={[scale]}
+              value={[localScale]}
               min={0.01}
               max={2}
               step={0.01}
               onValueChange={handleScaleChange}
               className="flex-1"
             />
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              onClick={() => setScale(Math.min(2, scale + 0.1))}
-            >
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleScaleButton(0.1)}>
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
           </div>
