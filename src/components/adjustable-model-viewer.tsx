@@ -71,9 +71,7 @@ function Model({
   onLoad?: (scene: THREE.Group) => void
   onError?: (error: any) => void
 }) {
-  const { scene } = useGLTF(url, undefined, (error) => {
-    if (onError) onError(error)
-  })
+  const { scene } = useGLTF(url, undefined)
   const modelRef = useRef<THREE.Group>(null)
 
   // Простое клонирование сцены
@@ -155,7 +153,7 @@ function CameraControls({
   onCameraChange?: (position: THREE.Vector3, target: THREE.Vector3) => void
 }) {
   const { camera } = useThree()
-  const controlsRef = useRef<any>()
+  const controlsRef = useRef<any>(null)
 
   // Восстанавливаем позицию камеры при изменении cameraPosition
   useEffect(() => {
@@ -571,10 +569,7 @@ export default function AdjustableModelViewer({
               powerPreference: "default",
               stencil: false,
               depth: true,
-              onContextLost: () => {
-                console.error("WebGL context lost in renderer")
-                setWebGLContextLost(true)
-              },
+              
             }}
             dpr={1}
             onCreated={({ gl }) => {
